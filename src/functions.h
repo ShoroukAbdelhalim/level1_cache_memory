@@ -21,13 +21,13 @@ void show_usage(string);
 class cache {
 
 public:
-	int block_size = -1;
+		int block_size = -1;
 		int cache_size = -1;
 		int num_entries = -1;
 		int associativity = -1;
 		char write_policy = ' ';
-		char command;
-		long int address;
+		char command = 'n';
+		long int address = -1;
 		float nref = 0;
 		int nread = 0;
 		int nwrite = 0;
@@ -38,9 +38,9 @@ public:
 		int offset_bits_num = 0;
 		int entry_bits_num = 0;
 		int tag_bits_num = 0;
-		string offset_bits;
-		string entry_bits;
-		string tag_bits;
+		string offset_bits = "N";
+		string entry_bits = "N";
+		string tag_bits = "N";
 		const char* file_name = "../output.txt";
 		chrono::high_resolution_clock::time_point start_time;
 		bool finish_trace = false;

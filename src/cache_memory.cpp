@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
 	char replacement = 'l';
 	float hit_rate;
 	float miss_rate;
+	const char* trace_file = "../ex_trace.trc";
 
 	 if (argc < 9) {
 	        show_usage(argv[0]);
@@ -73,17 +74,15 @@ int main(int argc, char *argv[]) {
 	    cache cache_sim(block_size, cache_size, associativity, write_policy);
 	    cache_sim.print_cache_info();
 
-
-
 		// open transactions file
 
-		ifstream rfile("../ex_trace.trc");
+		ifstream rfile(trace_file);
 
 		if (!(rfile.is_open())){
 			cout << "Transactions File is not opened correctly"<<"\n";
 		}
 
-		string token;
+
 
 		 while (getline(rfile, line)) {
 		    cout << line << "\n";

@@ -29,13 +29,18 @@ cache :: cache (int block, int cache, int associat, char write){
 		start_time = std::chrono::high_resolution_clock::now();
 
 
+
+	    cout <<tag_bits <<" "<<entry_bits<<" "<<offset_bits<<"\n";
+
+
+
 	}
 int cache :: print_cache_info (void){
 
 	ofstream myfile;
     myfile.open(file_name,myfile.out | myfile.app);
 
-    myfile<<cache_size/1024<<"KB "<<associativity<<"-way associative cache:\n";
+    myfile<<cache_size<<"KB "<<associativity<<"-way associative cache:\n";
     myfile <<"\tBlock size = "<<block_size<<" bytes\n";
     myfile<<"\tNumber of [sets,blocks] = ["<<cache_size/block_size/associativity<<","<<cache_size/block_size<<"]\n";
     myfile<<"\tExtra space for tag storage = "<<"\n";
@@ -60,35 +65,46 @@ int cache :: LRU_cache_access(char cmd, long int addr){
     command = cmd;
     address = addr;
 
-    if (command == 'R') nread++;
-    else nwrite++;
-    string r;
+
     bool hit = false;
     int way = -1;
     int uway = -1;
     bool dirty_flag = false;
 
-    r = bitset< 26 >( address ).to_string();
-    offset_bits = r.substr (tag_bits_num+entry_bits_num,offset_bits_num);
-    entry_bits = r.substr (tag_bits_num,entry_bits_num);
-    tag_bits = r.substr (0,tag_bits_num);
+
+	long int cache_line_index, base, cache_index;
+	base = address / block_size;
+	cache_index = base % num_entries;
+	cache_line_index = address % block_size;
+
+	double min = 99999999999999;
+	int victim_index = -1;
+
+	string r;
+	r = bitset< 26 >( address ).to_string();
+	offset_bits = r.substr (tag_bits_num+entry_bits_num,offset_bits_num);
+	entry_bits = r.substr (tag_bits_num,entry_bits_num);
+	tag_bits = r.substr (0,tag_bits_num);
+
+
+    if (command == 'R') nread++;
+    else nwrite++;
+
 
     ofstream myfile;
     myfile.open(file_name,myfile.out | myfile.app);
-    myfile << setw(5)<<hex<< address<<""<<command<<" "<<tag_bits<<" "<<entry_bits<<" "<<offset_bits<<" "<<setw(5)<<dec<<stoi(tag_bits,0,2)<<" "<<setw(5)<<dec<<stoi(entry_bits,0,2)<<" "<<setw(5)<<dec<<stoi(offset_bits,0,2)<<" ";
+    myfile << setw(5)<<hex<< address<<""<<command<<" "<<tag_bits<<" "<<entry_bits<<" "<<offset_bits<<" ";
+
+    myfile <<setw(5)<<dec<<stoi(tag_bits,0,2)<<" "<<setw(5)<<cache_index<<" "<<setw(5)<<cache_line_index<<" ";
+
 
     struct cache_element cache_item;
-    	cache_item.last_used_time = -1;
-    	cache_item.cache_line_vector.resize(block_size, -1);
+    cache_item.last_used_time = -1;
+    cache_item.cache_line_vector.resize(block_size, -1);
 
-    	static vector<vector< struct cache_element > > cache_object (associativity,vector < struct cache_element> (num_entries,  cache_item));
-    	static vector<vector< bool > > dirty (associativity,vector < bool> (num_entries,false));
+    static vector<vector< struct cache_element > > cache_object (associativity,vector < struct cache_element> (num_entries,  cache_item));
+    static vector<vector< bool > > dirty (associativity,vector < bool> (num_entries,false));
 
-
-    	long int cache_line_index, base, cache_index;
-    	base = address / block_size;
-    	cache_index = base % num_entries;
-    	cache_line_index = address % block_size;
 
     	for(unsigned int i = 0; i < cache_object.size(); i++){
 
@@ -109,10 +125,6 @@ int cache :: LRU_cache_access(char cmd, long int addr){
     	if(!hit){
 
     		misses++;
-
-
-    		double min = 99999999999999;
-    		int victim_index = -1;
 
     		//Looking for the right slot to replace
 
@@ -177,9 +189,6 @@ int cache :: FIFO_cache_access( char cmd, long int addr){
 	cache_index = base % num_entries;
 	cache_line_index = address % block_size;
 
-    if (command == 'R') nread++;
-    else nwrite++;
-    string r;
     bool hit = false;
     int way = -1;
     int uway = -1;
@@ -187,27 +196,34 @@ int cache :: FIFO_cache_access( char cmd, long int addr){
     static vector<int> fifo_count (num_entries,-1);
 	int victim_index = -1;
 
-    r = bitset< 26 >( address ).to_string();
-    offset_bits = r.substr (tag_bits_num+entry_bits_num,offset_bits_num);
-    entry_bits = r.substr (tag_bits_num,entry_bits_num);
-    tag_bits = r.substr (0,tag_bits_num);
+	string r;
+	r = bitset< 26 >( address ).to_string();
+	offset_bits = r.substr (tag_bits_num+entry_bits_num,offset_bits_num);
+	entry_bits = r.substr (tag_bits_num,entry_bits_num);
+	tag_bits = r.substr (0,tag_bits_num);
+
+
+    if (command == 'R') nread++;
+    else nwrite++;
 
     ofstream myfile;
     myfile.open(file_name,myfile.out | myfile.app);
-    myfile << setw(5)<<hex<< address<<""<<command<<" "<<tag_bits<<" "<<entry_bits<<" "<<offset_bits<<" "<<setw(5)<<dec<<stoi(tag_bits,0,2)<<" "<<setw(5)<<dec<<stoi(entry_bits,0,2)<<" "<<setw(5)<<dec<<stoi(offset_bits,0,2)<<" ";
+    myfile << setw(5)<<hex<< address<<""<<command<<" "<<tag_bits<<" "<<entry_bits<<" "<<offset_bits<<" ";
+    myfile << setw(5)<<dec<<stoi(tag_bits,0,2)<<" "<<setw(5)<<cache_index<<" "<<setw(5)<<cache_line_index<<" ";
 
     struct cache_element cache_item;
-    	cache_item.last_used_time = -1;
-    	cache_item.cache_line_vector.resize(block_size, -1);
+    cache_item.last_used_time = -1;
+    cache_item.cache_line_vector.resize(block_size, -1);
 
-    	static vector<vector< struct cache_element > > cache_object (associativity,vector < struct cache_element> (num_entries,  cache_item));
-    	static vector<vector< bool > > dirty (associativity,vector < bool> (num_entries,false));
+    static vector<vector< struct cache_element > > cache_object (associativity,vector < struct cache_element> (num_entries,  cache_item));
+    static vector<vector< bool > > dirty (associativity,vector < bool> (num_entries,false));
 
 
 
     	for(unsigned int i = 0; i < cache_object.size(); i++){
 
     		if(cache_object[i][cache_index].cache_line_vector[cache_line_index] == address){
+
     			hits++;
     			//Cache hit -- update last_used_time
 
@@ -230,7 +246,6 @@ int cache :: FIFO_cache_access( char cmd, long int addr){
     		fifo_count [cache_index] ++;
     		if (fifo_count [cache_index] == associativity) fifo_count [cache_index] = 0;
     		victim_index = fifo_count [cache_index];
-    		cout<< "replaced way"<<victim_index<<"\n";
 
 
 
@@ -283,22 +298,31 @@ int cache :: Random_cache_access(char cmd, long int addr){
     command = cmd;
     address = addr;
 
-    if (command == 'R') nread++;
-    else nwrite++;
-    string r;
     bool hit = false;
     int way = -1;
     int uway = -1;
     bool dirty_flag = false;
 
-    r = bitset< 26 >( address ).to_string();
-    offset_bits = r.substr (tag_bits_num+entry_bits_num,offset_bits_num);
-    entry_bits = r.substr (tag_bits_num,entry_bits_num);
-    tag_bits = r.substr (0,tag_bits_num);
+
+	long int cache_line_index, base, cache_index;
+	base = address / block_size;
+	cache_index = base % num_entries;
+	cache_line_index = address % block_size;
+
+	string r;
+	r = bitset< 26 >( address ).to_string();
+	offset_bits = r.substr (tag_bits_num+entry_bits_num,offset_bits_num);
+	entry_bits = r.substr (tag_bits_num,entry_bits_num);
+	tag_bits = r.substr (0,tag_bits_num);
+
+
+
+    if (command == 'R') nread++;
+    else nwrite++;
 
     ofstream myfile;
     myfile.open(file_name,myfile.out | myfile.app);
-    myfile << setw(5)<<hex<< address<<""<<command<<" "<<tag_bits<<" "<<entry_bits<<" "<<offset_bits<<" "<<setw(5)<<dec<<stoi(tag_bits,0,2)<<" "<<setw(5)<<dec<<stoi(entry_bits,0,2)<<" "<<setw(5)<<dec<<stoi(offset_bits,0,2)<<" ";
+    myfile << setw(5)<<hex<< address<<""<<command<<" "<<tag_bits<<" "<<entry_bits<<" "<<offset_bits<<" "<<setw(5)<<dec<<stoi(tag_bits,0,2)<<" "<<setw(5)<<cache_index<<" "<<setw(5)<<cache_line_index<<" ";
 
     struct cache_element cache_item;
     	cache_item.last_used_time = -1;
@@ -308,10 +332,6 @@ int cache :: Random_cache_access(char cmd, long int addr){
     	static vector<vector< bool > > dirty (associativity,vector < bool> (num_entries,false));
 
 
-    	long int cache_line_index, base, cache_index;
-    	base = address / block_size;
-    	cache_index = base % num_entries;
-    	cache_line_index = address % block_size;
 
     	for(unsigned int i = 0; i < cache_object.size(); i++){
 
@@ -337,16 +357,8 @@ int cache :: Random_cache_access(char cmd, long int addr){
     		int victim_index = -1;
 
     		//Looking for the right slot to replace
-/*
-    		for(unsigned int i = 0; i < cache_object.size(); i++){
-    			if(cache_object[i][cache_index].last_used_time < min){
-    				min = cache_object[i][cache_index].last_used_time;
-    				victim_index = i;
-    			}
-    		}*/
 
     		victim_index = 0 + (rand() * (int)(cache_object.size() -1) / RAND_MAX);
-    		cout << "uway "<<victim_index <<"cache entries "<<cache_object.size()<<"\n";
 
 
     		//replacing element at victim index
