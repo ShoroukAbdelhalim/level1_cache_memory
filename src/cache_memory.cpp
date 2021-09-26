@@ -24,6 +24,8 @@ int main(int argc, char *argv[]) {
 	char write_policy;
 	int associativity = 0;
 	char replacement = 'l';
+	float hit_rate;
+	float miss_rate;
 
 	 if (argc < 9) {
 	        show_usage(argv[0]);
@@ -69,7 +71,7 @@ int main(int argc, char *argv[]) {
 	    }
 
 	    cache cache_sim(block_size, cache_size, associativity, write_policy);
-	    //cache_sim.print_cache_info();
+	    cache_sim.print_cache_info();
 
 
 
@@ -89,8 +91,6 @@ int main(int argc, char *argv[]) {
 			ss << line;
 			ss >> command >> hex >> address;
 
-
-
 		    if (replacement == 'l'){
 		    	cache_sim.LRU_cache_access(command,address);
 		    } else if (replacement == 'f'){
@@ -100,8 +100,23 @@ int main(int argc, char *argv[]) {
 		    }
 
 		  }
-		rfile.close();
 
+		 ofstream myfile;
+		 myfile.open(cache_sim.file_name,myfile.out | myfile.app);
+
+		 hit_rate = cache_sim.hits/cache_sim.nref;
+		 miss_rate = cache_sim.misses/cache_sim.nref;
+
+
+		 myfile<<"\n";
+		 myfile<<"nref="<<cache_sim.nref<<", nread="<<cache_sim.nread<<", nwrite="<<cache_sim.nwrite<<"\n";
+		 myfile <<"\thits = "<<cache_sim.hits<<", hit rate = "<<hit_rate<<"\n";
+		 myfile <<"\tmisses = "<<cache_sim.misses<<", miss rate = "<<miss_rate<<"\n";
+		 myfile<<"\tmain memory reads="<<cache_sim.main_read<<", main memory write="<<cache_sim.main_write<<"\n";
+
+
+		rfile.close();
+		myfile.close();
 
 
 	return 0;
