@@ -8,12 +8,15 @@
 #include <chrono>
 #include <iomanip>
 #include <ctime>
+#include <cstring>
+#include <typeinfo>
 
 using namespace std;
 
 struct cache_element{
 	double last_used_time;
 	vector<long int> cache_line_vector;
+	bool dirty;
 };
 
 void show_usage(string);
@@ -28,11 +31,11 @@ public:
 		char write_policy = ' ';
 		char command = 'n';
 		long int address = -1;
-		float nref = 0;
+		int nref = 0;
 		int nread = 0;
 		int nwrite = 0;
-		float hits = 0;
-		float misses = 0;
+		int hits = 0;
+		int misses = 0;
 		int main_read = 0;
 		int main_write = 0;
 		int offset_bits_num = 0;
@@ -41,7 +44,7 @@ public:
 		string offset_bits = "N";
 		string entry_bits = "N";
 		string tag_bits = "N";
-		const char* file_name = "../output.txt";
+		const char* file_name = "../ex_output.out.txt";
 		chrono::high_resolution_clock::time_point start_time;
 		bool finish_trace = false;
 
