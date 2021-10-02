@@ -92,6 +92,10 @@ int cache :: print_cache_info (void){
 }
 
 int cache :: LRU_cache_access(char cmd, long int addr){
+// set variables for cache memory access
+	nref++;
+	command = cmd;
+	address = addr;
 
 // init variables for LRU replacement policy accessing cache
 	bool hit					= false;
@@ -108,11 +112,6 @@ int cache :: LRU_cache_access(char cmd, long int addr){
 	main_memory_write = 0;
 
 
-
-// set variables for cache memory access
-	nref++;
-    command = cmd;
-    address = addr;
 
 	base = address / block_size;
 	cache_index = base % num_entries;
@@ -141,7 +140,9 @@ int cache :: LRU_cache_access(char cmd, long int addr){
 // check availability of the required block inside cache
     	for(unsigned int i = 0; i < cache_object.size(); i++){
 
+
     		if(cache_object[i][cache_index].cache_line_vector[cache_line_index] == address){
+
     			hits++;
 
     			//Cache hit -- update last_used_time
@@ -149,11 +150,14 @@ int cache :: LRU_cache_access(char cmd, long int addr){
     			hit = true;
     			way = i;
     			uway = -2;
+    			if ((write_policy == 'b' || write_policy == 'T') && (command == 'W')){
+    				uway = i;
+    			}
     			main_memory_read = 0;
     			main_memory_write = 0;
     			if (command == 'w'){
     				cache_object[i][cache_index].dirty = true;
-    				if (write_policy == 't' || write_policy == 'T') main_memory_write ++;
+    				if (write_policy == 't' || write_policy == 'T') main_memory_write++;
     				main_write++;
     			}
 
@@ -168,7 +172,7 @@ int cache :: LRU_cache_access(char cmd, long int addr){
     		way = -1;
 
 
-    		if (command == 'W' && write_policy == 't'){
+    		if ((command == 'W') && (write_policy == 't')){
     			way = -1;
     			uway = -1;
     			main_memory_write++;
@@ -183,6 +187,7 @@ int cache :: LRU_cache_access(char cmd, long int addr){
     			    	victim_index = i;
     			    	way = -1;
     			    	uway = victim_index;
+
     			    }
     			}
 
@@ -192,9 +197,7 @@ int cache :: LRU_cache_access(char cmd, long int addr){
 
     	    	for(unsigned int i = 0; i < cache_object[victim_index][cache_index].cache_line_vector.size(); i++){
     	    	    cache_object[victim_index][cache_index].cache_line_vector[i] = base * block_size + i;
-
     	    	}
-
 
 // In case of write command, update the dirty bit
     	    	if (command == 'W') cache_object[victim_index][cache_index].dirty = true;
@@ -296,6 +299,9 @@ int cache :: FIFO_cache_access( char cmd, long int addr){
     		hit = true;
     		way = i;
     		uway = -1;
+			if ((write_policy == 'b' || write_policy == 'T') && (command == 'W')){
+				uway = i;
+			}
     		main_memory_read = 0;
     		main_memory_write = 0;
     		if (command == 'w'){
@@ -429,7 +435,10 @@ int cache :: Random_cache_access(char cmd, long int addr){
     		cache_object[i][cache_index].last_used_time = chrono::duration<long double, milli> (chrono::high_resolution_clock::now() - start_time).count();
     		hit = true;
     		way = i;
-    		uway = -2;
+    		uway = -1;
+			if ((write_policy == 'b' || write_policy == 'T' )&& (command == 'W')){
+				uway = i;
+			}
     		main_memory_read = 0;
     		main_memory_write = 0;
     		if (command == 'w'){
