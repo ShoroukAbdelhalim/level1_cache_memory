@@ -1,7 +1,7 @@
 # level1_cache_memory
 	Level 1 cache memory is a simulator of a cache system of one level. It simulates different types of caches: 
 Dirrect mapping, Set-associative and full associative caches. It also implements different types of replacements 
-policies: LRU, FIFO and Random replacement policies. In addition, It considers the different writing moods: write 
+policies: LRU, FIFO and Random replacement policies. In addition, It considers the different writing modes: write 
 through with write-allocation, write through with non-write-allocation and write back with write allocation.
 
 
@@ -13,8 +13,8 @@ can have the following format:
 <read/write>:<addr>
 
 
-# Building and Running MCsim - Standalone
-	Level 1 cache memory requires a C++11 compiler. To build an optimized MCsim simply follow:
+# Building and Running
+	Level 1 cache memory requires a C++ compiler. To build an optimized level 1 cache simply follow:
 
  $ cd level1_cache_memory/src
  $ g++ cache_memory.cpp funtions.cpp functions.h -o main

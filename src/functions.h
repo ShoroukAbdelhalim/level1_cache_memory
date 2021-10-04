@@ -44,7 +44,7 @@ public:
 		string offset_bits = "N";
 		string entry_bits = "N";
 		string tag_bits = "N";
-		const char* file_name = "../ex_output.out.txt";
+		const char* file_name = "../ex_output.out";
 		chrono::high_resolution_clock::time_point start_time;
 		bool finish_trace = false;
 
